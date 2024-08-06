@@ -9,7 +9,7 @@ from flask_limiter.util import get_remote_address
 from flask import *
 
 app = Flask(__name__)
-app.secret_key = "sdfnisaJADh9h8%$(9u9KD"
+app.secret_key = "sdfnisaJADh9h8%$(9u9KD" # change this
 
 used_captchas = []
 
@@ -106,6 +106,55 @@ def login():
 @limiter.limit("15/minute")
 def main():
     return render_template("index.html", loggedIn="user" in session)
+
+@app.route("/edit_bio", methods=["GET", "POST"])
+def editbio():
+    if not "user" in session:
+        return "Not logged in."
+
+    if request.method == "POST":
+        if not request.form.get("newbio"):
+            return "Expected \"newbio\" parameter."
+
+        if len(request.form.get("newbio")) > 350:
+            return "Your bio was too long. Please choose a shorter bio."
+        if len(request.form.get("newbio")) < 4:
+            return "Bio must be of at least 4 characters long. Please choose a longer bio."
+
+        conn = sqlite3.connect("data.db")
+        cursor = conn.cursor()
+
+        cursor.execute("update accounts set bio=? where username=?", (request.form.get("newbio"), session.get("user"),),)
+
+        conn.commit()
+        conn.close()
+        return redirect(f"/user/{session.get('user')}")
+
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("select bio from accounts where username=?", (session.get("user"),),)
+    current_bio = cursor.fetchone()[0] 
+
+    conn.close()
+
+    return render_template("bioedit.html", loggedIn="user" in session, current_bio=current_bio) 
+
+@app.route("/user/<username>")
+def profile(username):
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+   
+    cursor.execute("select * from accounts where username=?", (username,),)
+    if not cursor.fetchone():
+        return "User doesn't exist. Please enter a valid username."
+    
+    cursor.execute("select bio from accounts where username=?", (username,),)
+    #print(cursor.fetchone()[0])
+    bio = cursor.fetchone()[0]
+
+    conn.close()
+    return render_template("profile.html", username=username, bio=bio, loggedIn='user' in session, username1=session.get("user"))
 
 @app.route("/logout")
 @limiter.limit("5/minute")
