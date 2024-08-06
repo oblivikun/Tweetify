@@ -12,7 +12,6 @@ app = Flask(__name__)
 app.secret_key = "sdfnisaJADh9h8%$(9u9KD" # change this
 
 used_captchas = []
-staff_members = [] # will add staff later
 
 limiter = Limiter(get_remote_address, app=app)
 
