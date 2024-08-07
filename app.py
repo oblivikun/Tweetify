@@ -108,12 +108,23 @@ def main():
     return render_template("index.html", loggedIn="user" in session)
 
 @app.route("/settings")
-@limiter.limit("4/minute")
 def settings():
     return render_template("settings.html", loggedIn="user" in session) 
 
+@app.route("/dm/<username>")
+def dm(username):
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("select * from accounts where username=?",(username,))
+    if not cursor.fetchone():
+        return "Requested user does not exist."
+
+    conn.close()
+
+    return render_template("dm.html", username=username)
+
 @app.route("/change_password", methods=["POST"])
-@limiter.limit("4/minute")
 def changepwd():
     if not "user" in session:
         return "Not logged in."
