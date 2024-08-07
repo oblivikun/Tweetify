@@ -108,10 +108,12 @@ def main():
     return render_template("index.html", loggedIn="user" in session)
 
 @app.route("/settings")
+@limiter.limit("4/minute")
 def settings():
     return render_template("settings.html", loggedIn="user" in session) 
 
 @app.route("/change_password", methods=["POST"])
+@limiter.limit("4/minute")
 def changepwd():
     if not "user" in session:
         return "Not logged in."
