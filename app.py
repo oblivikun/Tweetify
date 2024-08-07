@@ -38,7 +38,7 @@ def signup():
     if "user" in session:
         return "Already logged in."
     else:
-        if request.form.get("username") and request.form.get("password"):
+        if request.form.get("username") and request.form.get("password") and request.form.get("captcha"):
             conn = sqlite3.connect("data.db")
             cursor = conn.cursor()
            
@@ -74,7 +74,7 @@ def login():
     if "user" in session:
         return "Already signed in."
     else:
-        if request.form.get("username") and request.form.get("password"):
+        if request.form.get("username") and request.form.get("password") and request.form.get("captcha"):
             conn = sqlite3.connect("data.db")
             cursor = conn.cursor()
 
@@ -107,7 +107,37 @@ def login():
 def main():
     return render_template("index.html", loggedIn="user" in session)
 
+@app.route("/settings")
+def settings():
+    return render_template("settings.html", loggedIn="user" in session) 
+
+@app.route("/change_password", methods=["POST"])
+def changepwd():
+    if not "user" in session:
+        return "Not logged in."
+    if not request.form.get("currentpwd") and request.form.get("newpwd"):
+        return "Expected params: currentpwd, newpwd"
+    if len(request.form.get("newpwd")) > 1000 or len(request.form.get("newpwd")) < 8:
+        return "Password must be no more than 1000 characters and no less than 8 characters."
+    if request.form.get("newpwd") == request.form.get("currentpwd"):
+        return "New password is the same as the old password."
+
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("select * from accounts where username=? and password=?",(session.get("user"),request.form.get("currentpwd"),),)
+    if not cursor.fetchone():
+        return "Current password is incorrect."
+
+    cursor.execute("update accounts set password=? where username=?", (request.form.get("newpwd"), session.get("user"),),)
+
+    conn.commit()
+    conn.close()
+
+    return redirect("/")
+
 @app.route("/edit_bio", methods=["GET", "POST"])
+@limiter.limit("4/minute")
 def editbio():
     if not "user" in session:
         return "Not logged in."
