@@ -24,6 +24,14 @@
 		</ul>
 		<div style="margin-left:25%;padding:1px 16px;height:1000px;">
 			<h1>Direct Messages with {{ username }}</h1>
+			{% if not messages %}
+			<p>No messages yet.</p>
+			{% endif %}
+			{% if messages %}
+				{% for message in messages %}
+					<p><b>{{ message[0] }}</b>: {{ message[1] }}</p>
+				{% endfor %}
+			{% endif %}
 			<form action="/submitdm/{{ username }}" method="POST">
 				<input type="text" name="message" style="font-size: 20px;" placeholder="Enter your message..."><br>
 				<button style="font-size: 20px; background-color: #339EFF;">Submit Direct Message</button>

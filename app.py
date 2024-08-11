@@ -114,7 +114,7 @@ def settings():
     return render_template("settings.html", loggedIn="user" in session) 
 
 @app.route("/dm/<username>")
-@limiter.limit("4/minute")
+@limiter.limit("10/minute")
 def dm(username):
     if "user" not in session:
         return "You are not logged in."
@@ -127,11 +127,11 @@ def dm(username):
     if not cursor.fetchone():
         return "Requested user does not exist."
 
-    cursor.execute("select * from dms where (sender=? and receiver=?) or (sender=? and receiver=?)", (session.get("user"), username, username, session.get("user"),),)
+    cursor.execute("select sender, message from dms where (sender=? and receiver=?) or (sender=? and receiver=?)", (session.get("user"), username, username, session.get("user"),),)
     messages = cursor.fetchall()
-
-    conn.close()
     
+    conn.close()
+
     return render_template("dm.html", username=username, messages=messages, loggedIn="user" in session)
 
 @app.route("/submitdm/<username>", methods=["POST"])
@@ -140,6 +140,11 @@ def submit_dm(username):
         return "You are not logged in."
     elif session.get("user") == username:
         return "What are you doing? You can't DM yourself."
+
+    if len(request.form.get("message")) <= 1:
+        return "Why is your message under 1 character long?"
+    elif len(request.form.get("message")) > 360:
+        return "Message must be less than 360 characters."
     conn = sqlite3.connect("data.db")
     cursor = conn.cursor()
 
