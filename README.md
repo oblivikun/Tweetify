@@ -30,7 +30,7 @@ The default listening port is 5000 so visit http://127.0.0.1:5000/ in your web b
 # TODO:
 
 - Create communities (not done)
-- Create DM feature (done but i need to add engaged_dms feature like tweetor)
+- Create DM feature (done)
 - Create bio feature (done)
 - Add image captcha (done)
 - Improve security (not done)
