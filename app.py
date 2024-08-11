@@ -116,6 +116,10 @@ def settings():
 @app.route("/dm/<username>")
 @limiter.limit("4/minute")
 def dm(username):
+    if "user" not in session:
+        return "You are not logged in."
+    elif session.get("user") == username:
+        return "What are you doing? You can't DM yourself."
     conn = sqlite3.connect("data.db")
     cursor = conn.cursor()
 
@@ -123,9 +127,27 @@ def dm(username):
     if not cursor.fetchone():
         return "Requested user does not exist."
 
-    conn.close()
+    cursor.execute("select * from dms where (sender=? and receiver=?) or (sender=? and receiver=?)", (session.get("user"), username, username, session.get("user"),),)
+    messages = cursor.fetchall()
 
-    return render_template("dm.html", username=username)
+    conn.close()
+    
+    return render_template("dm.html", username=username, messages=messages, loggedIn="user" in session)
+
+@app.route("/submitdm/<username>", methods=["POST"])
+def submit_dm(username):
+    if "user" not in session:
+        return "You are not logged in."
+    elif session.get("user") == username:
+        return "What are you doing? You can't DM yourself."
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("insert into dms values (?, ?, ?, ?)", (session.get("user"), username, request.form.get("message"), request.headers.get("X-Forwarded-For"),),)
+
+    conn.commit()
+    conn.close()
+    return redirect(f"/dm/{username}")
 
 @app.route("/change_password", methods=["POST"])
 @limiter.limit("10 per day")
