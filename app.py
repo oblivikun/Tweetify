@@ -113,6 +113,21 @@ def main():
 def settings():
     return render_template("settings.html", loggedIn="user" in session) 
 
+@app.route("/api/engaged_dms", methods=["GET"])
+def engaged_dms():
+    if "user" not in session:
+        return "You are not logged in."
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("select sender from dms where receiver=? union select receiver from dms where sender=? ", (session.get("user"), session.get("user"),),)
+    engaged_dms = cursor.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"resp" : engaged_dms}) 
+
 @app.route("/dm/<username>")
 @limiter.limit("10/minute")
 def dm(username):
@@ -135,6 +150,7 @@ def dm(username):
     return render_template("dm.html", username=username, messages=messages, loggedIn="user" in session)
 
 @app.route("/submitdm/<username>", methods=["POST"])
+@limiter.limit("10/minute")
 def submit_dm(username):
     if "user" not in session:
         return "You are not logged in."
