@@ -24,6 +24,10 @@
 		</ul>
 		<div style="margin-left:25%;padding:1px 16px;height:1000px;">
 			<h1>Direct Messages with {{ username }}</h1>
+			<form action="/submitdm/{{ username }}">
+				<input type="text" placeholder="Enter your message..."><br>
+				<button style="">Submit Direct Message</button>
+			</form>
 		</div>
 	</body>
 </html>

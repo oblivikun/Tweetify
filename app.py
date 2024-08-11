@@ -16,6 +16,7 @@ used_captchas = []
 limiter = Limiter(get_remote_address, app=app)
 
 @app.route("/api/get_captcha")
+@limiter.limit("25/minute")
 def generate_captcha():
     while True:
         correct_captcha = "".join(secrets.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(6))
@@ -108,10 +109,12 @@ def main():
     return render_template("index.html", loggedIn="user" in session)
 
 @app.route("/settings")
+@limiter.limit("5/minute")
 def settings():
     return render_template("settings.html", loggedIn="user" in session) 
 
 @app.route("/dm/<username>")
+@limiter.limit("4/minute")
 def dm(username):
     conn = sqlite3.connect("data.db")
     cursor = conn.cursor()
@@ -125,6 +128,7 @@ def dm(username):
     return render_template("dm.html", username=username)
 
 @app.route("/change_password", methods=["POST"])
+@limiter.limit("10 per day")
 def changepwd():
     if not "user" in session:
         return "Not logged in."
@@ -184,6 +188,7 @@ def editbio():
     return render_template("bioedit.html", loggedIn="user" in session, current_bio=current_bio) 
 
 @app.route("/user/<username>")
+@limiter.limit("5/minute")
 def profile(username):
     conn = sqlite3.connect("data.db")
     cursor = conn.cursor()
