@@ -27,3 +27,14 @@ Then install the required PIP packages:
 run `python3 database_setup.py && python3 app.py` to generate the database and start the web server.
 The default listening port is 5000 so visit http://127.0.0.1:5000/ in your web browser.
 
+# TODO:
+
+- Create communities (not done)
+- Create DM feature (not fully completed)
+- Create bio feature (done)
+- Add image captcha (done)
+- Improve security (not done)
+- Add change password feature (done)
+- Add IP logging (done but i plan to remove IP logging in the future tbh)
+- Add image feature (not done)
+
