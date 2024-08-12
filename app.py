@@ -69,6 +69,10 @@ def signup():
             return redirect("/")
         return render_template("signup.html")
 
+@app.route("/communities/create")
+def createcom():
+    return "in progress"
+
 @app.route("/login", methods=["GET", "POST"])
 @limiter.limit("5/minute")
 def login():
