@@ -4,6 +4,12 @@
 		<title>Tweetify</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
 		<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+<style>
+#sby, #listmany {
+	height: 35px;
+	width: 300px;
+}
+</style>
 		<noscript>If you don't have javascript then features like DMs won't work on this website. Please enable javascript. We don't use malicious javascript or javascript for tracking.</noscript>
 	</head>
 	<body>
@@ -27,17 +33,23 @@
 			{% endif %}
 		</ul>
 		<div style="margin-left:25%;padding:1px 16px;height:1000px;">
-  			<h2>Fixed Full-height Side Nav</h2>
-  			<h3>Try to scroll this area, and see how the sidenav sticks to the page</h3>
-  			<p>Notice that this div element has a left margin of 25%. This is because the side navigation is set to 25% width. If you remove the margin, the sidenav will overlay/sit on top of this div.</p>
-  			<p>Also notice that we have set overflow:auto to sidenav. This will add a scrollbar when the sidenav is too long (for example if it has over 50 links inside of it).</p>
-  			<p>Some text..</p>
-  			<p>Some text..</p>
-  			<p>Some text..</p>
-  			<p>Some text..</p>
-  			<p>Some text..</p>
-  			<p>Some text..</p>
-  			<p>Some text..</p>
+			<h1>Tweetify - Home</h1>
+			<p>Tweetify is a social media platform similar to <a href="https://tweetor.pythonanywhere.com/">tweetor</a>. This project is open-source on Github at <a href="https://github.com/tweetoruser/Tweetify" target="_blank">https://github.com/tweetoruser/Tweetify</a>. Any contributions are greatly appreciated.</p>
+			<br>
+			<h2>Communities</h2>
+			<p>Get started by joining a community. You can create and join communities and talk with other people on there. You can also send direct messages to people. Here you can see a list of communities.</p>
+			<a href="/comminities/create"><button>Click here to create a community</button></a>
+			<hr>
+			<label for="sby">Sort by:</label>
+  			<select name="sby" id="sby">
+				<option value="popular">Most Popular Communities</option>
+				<option value="oldestcoms">Oldest Communities</option>
+    				<option value="mostrecent">Newest Communities</option>
+  			</select>
+			<br><br>
+			<label for="listmany">How many communities to list?:</label>
+			<input type="text" name="listmany" value="10" placeholder="How many?" id="listmany">
+			<hr>
 		</div>
 	</body>
 	{% if loggedIn %}
