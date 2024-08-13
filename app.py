@@ -36,7 +36,7 @@ def generate_captcha():
 # credits to heinrich-xiao for get_captcha function code. The /api/get_captcha thing wasn't created by me it was created by heinrich-xiao and modified by me.
 
 @app.route("/signup", methods=["GET", "POST"])
-@limiter.limit("5/minute")
+@limiter.limit("5 per day")
 def signup():
     if "user" in session:
         return "Already logged in."
