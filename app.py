@@ -74,7 +74,22 @@ def signup():
 @app.route("/sendmsg/<comid>", methods=["POST"])
 def sendmsg(comid):
     # message
-    return "in progress"
+    if "user" not in session:
+        return "Please log in before sending this message."
+    if not request.form.get("message"):
+        return "expected param: message"
+    if request.form.get("message") == "" or len(request.form.get("message")) <= 1 or len(request.form.get("message")) > 360:
+        return "Please have a longer message."
+
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("insert into messages (communityid, username, message, imageurl, ipaddress) values (?, ?, ?, ?, ?)", (comid, session.get("user"), request.form.get("message"), "", request.remote_addr,)) # add imageurl
+
+    conn.commit()
+    conn.close()
+
+    return redirect(f"/community/{comid}")
 
 @app.route("/community/<comid>")
 def community(comid):
