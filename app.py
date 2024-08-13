@@ -15,6 +15,7 @@ used_captchas = []
 
 limiter = Limiter(get_remote_address, app=app)
 
+# credits to heinrich-xiao for get_captcha code
 @app.route("/api/get_captcha")
 @limiter.limit("25/minute")
 def generate_captcha():
@@ -69,9 +70,33 @@ def signup():
             return redirect("/")
         return render_template("signup.html")
 
-@app.route("/communities/create")
+@app.route("/communities/create", methods=["GET", "POST"])
+@limiter.limit("5/minute")
 def createcom():
-    return "in progress"
+    if "user" not in session:
+        return "Not logged in. Please log in or create an account."
+    if request.method == "POST":
+        if request.form.get("captchain").lower() != session.get("correct_captcha").lower():
+            return "Captcha was not correct"
+        if len(request.form.get("comname")) < 3:
+            return "Make your community name longer."
+        if len(request.form.get("comname")) > 30:
+            return "Why is your community name so long?"
+        if len(request.form.get("desc")) > 150:
+            return "Description can't be longer than 150 characters."
+        if not re.match("^[a-zA-Z0-9\s,.]+$", request.form.get("comname")):
+            return "Only whitespaces, letters a-z and A-Z and commas and dots are allowed for community name."
+
+        conn = sqlite3.connect("data.db")
+        cursor = conn.cursor()
+
+        cursor.execute("insert into communities (owner, name, desc) values (?, ?, ?)", (session.get("user"), request.form.get("comname"), request.form.get("desc"),),)
+
+        conn.commit()
+        conn.close()
+
+        return redirect("/")
+    return render_template("createcom.html", loggedIn="user" in session)
 
 @app.route("/login", methods=["GET", "POST"])
 @limiter.limit("5/minute")
@@ -105,12 +130,50 @@ def login():
             conn.commit()
             conn.close()
             return redirect("/")   
-    return render_template("login.html")
+    return render_template("login.html", loggedIn="user" in session)
 
 @app.route("/")
 @limiter.limit("15/minute")
 def main():
-    return render_template("index.html", loggedIn="user" in session)
+    if not request.args.get("listmany"):
+        maxcoms = 10
+    else:
+        if not re.match("^[0-9]*$", request.args.get("listmany")):
+            return "Listmany must be an integer."
+        maxcoms = int(request.args.get("listmany"))
+
+    iterations = 1 
+    amountrows = 0
+    rows = []
+
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("select * from communities")
+
+    for aa in cursor.fetchall():
+        amountrows = amountrows + 1
+
+    if request.args.get("listmany"):
+        if int(request.args.get("listmany")) > amountrows:
+            return "Amount of communities requested to view is bigger than that of given communities."
+    
+    if not request.args.get("searchq"):
+        cursor.execute("select * from communities order by id desc")
+    else:
+        cursor.execute("select * from communities where lower(name) like ? order by id desc", ('%' + request.args.get("searchq").lower() + '%',))
+    for row in cursor.fetchall():
+        rows.append(row)
+        if iterations == maxcoms:
+            print("Finished")
+            break
+        else:
+            iterations = iterations + 1 
+    
+    iterations = 0
+
+    conn.close()
+    return render_template("index.html", loggedIn="user" in session, rows=rows, amountrows=amountrows)
 
 @app.route("/settings")
 @limiter.limit("5/minute")

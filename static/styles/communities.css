@@ -1,0 +1,13 @@
+.community {
+	border: 1px solid black;
+	margin-bottom: 10px;
+	padding-left: 10px;
+}
+
+.community a {
+	color: #3984DC;
+}
+
+.comtext {
+	color: red;
+}

@@ -3,6 +3,7 @@
 	<head>
 		<title>Tweetify</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+		<link rel="stylesheet" href="{{ url_for('static', filename='styles/communities.css') }}">
 		<script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 <style>
 #sby, #listmany {
@@ -38,18 +39,28 @@
 			<br>
 			<h2>Communities</h2>
 			<p>Get started by joining a community. You can create and join communities and talk with other people on there. You can also send direct messages to people. Here you can see a list of communities.</p>
-			<a href="/communities/create"><button>Click here to create a community</button></a>
+			<a href="/communities/create"><button style="font-size: 20px; background-color: #339EFF; color: white; border-radius: 20px">Click here to create a community</button></a>
 			<hr>
-			<label for="sby">Sort by:</label>
-  			<select name="sby" id="sby">
-				<option value="popular">Most Popular Communities</option>
-				<option value="oldestcoms">Oldest Communities</option>
-    				<option value="mostrecent">Newest Communities</option>
-  			</select>
-			<br><br>
-			<label for="listmany">How many communities to list?:</label>
-			<input type="text" name="listmany" value="10" placeholder="How many?" id="listmany">
+			<form action="/" method="GET">
+				<label for="listmany">How many communities to list?: (Max. {{ amountrows }})</label>
+				<input type="text" name="listmany" value="10" placeholder="How many?" id="listmany"><br>
+				<button style="font-size: 20px; background-color: #339EFF;">View specified value of communities</button>
+			</form>
 			<hr>
+			<form action="/" method="GET">
+				<label for="searchq">Search for communities:</label>
+				<input type="text" name="searchq" placeholder="Enter your search query here..." style="font-size: 20px;"><button style="font-size: 20px; background-color: #339EFF;">Search</button>
+			</form>
+			<hr>
+			<div class="communities">
+				{% for i in rows %}
+					<div class="community">
+						<a href="/community/{{ i[0] }}"><h3>{{ i[2] }}</h3></a>
+						<p class="comtext">Community by {{ i[1] }}</p>
+						<p>{{ i[3] }}</p>
+					</div>
+				{% endfor %}
+			</div>
 		</div>
 	</body>
 	{% if loggedIn %}
