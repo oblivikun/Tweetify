@@ -71,6 +71,29 @@ def signup():
             return redirect("/")
         return render_template("signup.html")
 
+@app.route("/sendmsg/<comid>", methods=["POST"])
+def sendmsg(comid):
+    # message
+    return "in progress"
+
+@app.route("/community/<comid>")
+def community(comid):
+    messages = []
+    conn = sqlite3.connect("data.db")
+    cursor = conn.cursor()
+
+    cursor.execute("select name from communities where id=?", (comid,))
+    name = cursor.fetchone()[0]
+    cursor.execute("select desc from communities where id=?", (comid,))
+    desc = cursor.fetchone()[0]
+    cursor.execute("select username, message, imageurl from messages where communityid=? order by messageid desc", (comid,))
+    for row in cursor.fetchall():
+        #print(row)
+        messages.append(row)
+
+    conn.close()
+    return render_template("community.html", loggedIn="user" in session, name=name, comid=comid, desc=desc, messages=messages)
+
 @app.route("/communities/create", methods=["GET", "POST"])
 @limiter.limit("7 per day")
 def createcom():
@@ -103,8 +126,11 @@ def createcom():
                 break
             iteration = iteration + 1
 
-        if (recentcoms[0], recentcoms[1], recentcoms[2], recentcoms[3],) == (session.get("user"),session.get("user"),session.get("user"), session.get("user"),):
-            return "You have been creating too many communities today. Calm down."
+        try:
+            if (recentcoms[0], recentcoms[1], recentcoms[2], recentcoms[3],) == (session.get("user"),session.get("user"),session.get("user"), session.get("user"),):
+                return "You have been creating too many communities today. Calm down."
+        except Exception as e:
+            print(e)
 
         iteration = 0
         recentcoms = []
