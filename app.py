@@ -15,7 +15,6 @@ used_captchas = []
 
 limiter = Limiter(get_remote_address, app=app)
 
-# credits to heinrich-xiao for get_captcha code
 @app.route("/api/get_captcha")
 @limiter.limit("25/minute")
 def generate_captcha():
@@ -33,6 +32,8 @@ def generate_captcha():
     captcha_image.save(buffer, format='PNG')
     buffer.seek(0)
     return send_file(buffer, mimetype='image/png')
+
+# credits to heinrich-xiao for get_captcha function code. The /api/get_captcha thing wasn't created by me it was created by heinrich-xiao and modified by me.
 
 @app.route("/signup", methods=["GET", "POST"])
 @limiter.limit("5/minute")
@@ -71,7 +72,7 @@ def signup():
         return render_template("signup.html")
 
 @app.route("/communities/create", methods=["GET", "POST"])
-@limiter.limit("5/minute")
+@limiter.limit("7 per day")
 def createcom():
     if "user" not in session:
         return "Not logged in. Please log in or create an account."
@@ -86,6 +87,31 @@ def createcom():
             return "Description can't be longer than 150 characters."
         if not re.match("^[a-zA-Z0-9\s,.]+$", request.form.get("comname")):
             return "Only whitespaces, letters a-z and A-Z and commas and dots are allowed for community name."
+
+        # anti-spam thingy
+
+        iteration = 0
+        conn = sqlite3.connect("data.db")
+        cursor = conn.cursor()
+
+        recentcoms = []
+        cursor.execute("select owner from communities order by id desc")
+        for row in cursor.fetchall():
+            if iteration != 4:
+                recentcoms.append(row[0])
+            else:
+                break
+            iteration = iteration + 1
+
+        if (recentcoms[0], recentcoms[1], recentcoms[2], recentcoms[3],) == (session.get("user"),session.get("user"),session.get("user"), session.get("user"),):
+            return "You have been creating too many communities today. Calm down."
+
+        iteration = 0
+        recentcoms = []
+
+        conn.close()
+
+        # end anti spam thingy
 
         conn = sqlite3.connect("data.db")
         cursor = conn.cursor()
