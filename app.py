@@ -2,6 +2,8 @@ import sqlite3
 import secrets
 import string
 import re
+import requests
+from urllib.parse import urlparse
 from io import BytesIO
 from captcha.image import ImageCaptcha 
 from flask_limiter import Limiter
@@ -14,6 +16,27 @@ app.secret_key = "sdfnisaJADh9h8%$(9u9KD" # change this
 used_captchas = []
 
 limiter = Limiter(get_remote_address, app=app)
+
+def check_image_url(url):
+    allowed_extensions = ["jpg", "png", "gif", "jpeg", "jfif", "tiff", "bmp", "tiffy", "pif", "wpeg", "webp"]
+    if not url.startswith("https://") and not url.startswith("http://"):
+        return False
+    parsed_url = urlparse(url)
+    path = parsed_url.path
+    for ext in allowed_extensions:
+        if path.endswith(f".{ext}"):
+            break
+    else:
+        return False
+    try:
+        response = requests.head(url)
+        response.raise_for_status()
+        content_type = response.headers.get("Content-Type")
+        if content_type and content_type.startswith("image/"):
+            return True
+        return False
+    except requests.exceptions.RequestException:
+        return False
 
 @app.route("/api/get_captcha")
 @limiter.limit("25/minute")
@@ -74,6 +97,18 @@ def signup():
 @app.route("/sendmsg/<comid>", methods=["POST"])
 def sendmsg(comid):
     # message, imageurl
+    if not request.form.get("message"):
+        return "Expected params: message"
+    
+    if request.form.get("imageurl"):
+        if not check_image_url(request.form.get("imageurl")):
+            imageurl = ""
+            return "URL does not contain a real image."
+        else:
+            imageurl = request.form.get("imageurl")
+    else:
+        imageurl = ""
+
     if "user" not in session:
         return "Please log in before sending this message."
     if not request.form.get("message"):
@@ -84,7 +119,7 @@ def sendmsg(comid):
     conn = sqlite3.connect("data.db")
     cursor = conn.cursor()
 
-    cursor.execute("insert into messages (communityid, username, message, imageurl, ipaddress) values (?, ?, ?, ?, ?)", (comid, session.get("user"), request.form.get("message"), "", request.remote_addr,)) # add imageurl
+    cursor.execute("insert into messages (communityid, username, message, imageurl, ipaddress) values (?, ?, ?, ?, ?)", (comid, session.get("user"), request.form.get("message"), imageurl, request.remote_addr,)) # add imageurl
 
     conn.commit()
     conn.close()

@@ -36,5 +36,5 @@ The default listening port is 5000 so visit http://127.0.0.1:5000/ in your web b
 - Improve security (not done)
 - Add change password feature (done)
 - Add IP logging (done but i plan to remove IP logging in the future tbh)
-- Add image feature (not done)
+- Add image feature (done)
 
