@@ -73,7 +73,7 @@ def signup():
 
 @app.route("/sendmsg/<comid>", methods=["POST"])
 def sendmsg(comid):
-    # message
+    # message, imageurl
     if "user" not in session:
         return "Please log in before sending this message."
     if not request.form.get("message"):
