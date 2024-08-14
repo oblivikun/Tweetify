@@ -3,6 +3,10 @@ body {
   font-family: 'Arial', sans-serif;
 }
 
+* {
+	word-wrap: break-word;
+}
+
 ul {
   list-style-type: none;
   margin: 0;

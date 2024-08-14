@@ -112,6 +112,7 @@ def signup():
         return render_template("signup.html")
 
 @app.route("/sendmsg/<comid>", methods=["POST"])
+@limiter.limit("2/minute")
 def sendmsg(comid):
     # message, imageurl
     if not request.form.get("message"):
@@ -145,6 +146,7 @@ def sendmsg(comid):
     #return redirect(f"/community/{comid}")
 
 @app.route("/community/<comid>")
+@limiter.limit("5/minute")
 def community(comid):
     messages = []
     conn = sqlite3.connect("data.db")
