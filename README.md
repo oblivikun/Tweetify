@@ -33,8 +33,12 @@ The default listening port is 5000 so visit http://127.0.0.1:5000/ in your web b
 - Create DM feature (done)
 - Create bio feature (done)
 - Add image captcha (done)
-- Improve security (not done)
+- Improve security (Added a few security features, but obviously it is still possible that it can be hacked, anything can be hacked.)
 - Add change password feature (done)
 - Add IP logging (done but i plan to remove IP logging in the future tbh)
 - Add image feature (done)
+
+- Add followers feature like X (not done)
+- Add feature for community owners to delete people's posts (not done)
+- Add support for video uploads and youtube.com embeds too (not done)
 
