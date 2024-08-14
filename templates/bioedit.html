@@ -31,6 +31,7 @@
 			<p>* Your current bio: {{ current_bio }}</p>
 			<p>* Max: 350 characters</p>
 			<form action="/edit_bio" method="POST">
+				<input type="input" name="csrf_token" value="{{ csrf_token() }}" hidden>
 				<textarea name="newbio" rows=10 cols=100>Your bio here... (replace this text)</textarea><br>
 				<button style="font-size: 20px; background-color: #339EFF;">Set new bio</button>
 			</form>

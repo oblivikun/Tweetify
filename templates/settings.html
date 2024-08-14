@@ -31,6 +31,7 @@
 			<p>These are your account settings where you can change your password and change other settings.</p>
 			<h2>Change Password</h2>
 			<form action="change_password" method="POST">
+				<input type="input" name="csrf_token" value="{{ csrf_token() }}" hidden>
 				<input type="password" name="currentpwd" placeholder="Current Password" style="font-size: 20px;"><br>
 				<input type="password" name="newpwd" placeholder="New password" style="font-size: 20px;"><br>
 				<button style="font-size: 20px; background-color: #339EFF;">Set password</button>

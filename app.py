@@ -3,15 +3,22 @@ import secrets
 import string
 import re
 import requests
+import uuid
+import hashlib
 from urllib.parse import urlparse
 from io import BytesIO
 from captcha.image import ImageCaptcha 
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask import *
+from flask_wtf.csrf import CSRFProtect
+
+sec_key = uuid.uuid4().hex
 
 app = Flask(__name__)
-app.secret_key = "sdfnisaJADh9h8%$(9u9KD" # change this
+app.secret_key = sec_key
+csrf = CSRFProtect(app)
+app.config['WTF_CSRF_SECRET_KEY'] = uuid.uuid4().hex
 
 used_captchas = []
 
@@ -37,6 +44,11 @@ def check_image_url(url):
         return False
     except requests.exceptions.RequestException:
         return False
+
+def hash_password(password):
+    sha256_hash = hashlib.sha256()
+    sha256_hash.update(password.encode('utf-8'))
+    return sha256_hash.hexdigest()
 
 @app.route("/api/get_captcha")
 @limiter.limit("25/minute")
@@ -83,7 +95,7 @@ def signup():
 
             cursor.execute("select * from accounts where username=?", (request.form.get("username"),),)
             if cursor.fetchone() == None:
-                cursor.execute("insert into accounts values (?, ?, 'Empty Bio')", (request.form.get("username"), request.form.get("password"),),)
+                cursor.execute("insert into accounts values (?, ?, 'Empty Bio')", (request.form.get("username"), hash_password(request.form.get("password")),),)
             else:
                 return 'User already exists'
 
@@ -124,7 +136,8 @@ def sendmsg(comid):
     conn.commit()
     conn.close()
 
-    return redirect(f"/community/{comid}")
+    return redirect(url_for("community", comid=comid))
+    #return redirect(f"/community/{comid}")
 
 @app.route("/community/<comid>")
 def community(comid):
@@ -223,7 +236,7 @@ def login():
             if request.form.get("captcha").lower() != session.get("correct_captcha").lower():
                 return "Captcha is incorrect."
             
-            cursor.execute("select * from accounts where username=? and password=?", (request.form.get("username"), request.form.get("password"),),)
+            cursor.execute("select * from accounts where username=? and password=?", (request.form.get("username"), hash_password(request.form.get("password")),),)
             if cursor.fetchone():
                 session["user"] = request.form.get("username")
             else:
@@ -280,6 +293,8 @@ def main():
 @app.route("/settings")
 @limiter.limit("5/minute")
 def settings():
+    if "user" not in session:
+        return "You are not logged in."
     return render_template("settings.html", loggedIn="user" in session) 
 
 @app.route("/api/engaged_dms", methods=["GET"])
@@ -337,10 +352,11 @@ def submit_dm(username):
 
     conn.commit()
     conn.close()
-    return redirect(f"/dm/{username}")
+    return redirect(url_for("dm", username=username))
+    #return redirect(f"/dm/{username}")
 
 @app.route("/change_password", methods=["POST"])
-@limiter.limit("10 per day")
+@limiter.limit("2 per day")
 def changepwd():
     if not "user" in session:
         return "Not logged in."
@@ -354,11 +370,11 @@ def changepwd():
     conn = sqlite3.connect("data.db")
     cursor = conn.cursor()
 
-    cursor.execute("select * from accounts where username=? and password=?",(session.get("user"),request.form.get("currentpwd"),),)
+    cursor.execute("select * from accounts where username=? and password=?",(session.get("user"),hash_password(request.form.get("currentpwd")),),)
     if not cursor.fetchone():
         return "Current password is incorrect."
 
-    cursor.execute("update accounts set password=? where username=?", (request.form.get("newpwd"), session.get("user"),),)
+    cursor.execute("update accounts set password=? where username=?", (hash_password(request.form.get("newpwd")), session.get("user"),),)
 
     conn.commit()
     conn.close()
@@ -424,5 +440,5 @@ def logout():
     return redirect("/")
 
 if __name__ == "__main__":
-    app.run("0.0.0.0")
+    app.run("0.0.0.0") # change
 

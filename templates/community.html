@@ -47,6 +47,7 @@
 			<form class="messagebox" action="/sendmsg/{{ comid }}" method="POST">
 				<!-- hidden inputs -->
 				<input type="text" name="imageurl" id="imageurl" hidden>
+				<input type="input" name="csrf_token" value="{{ csrf_token() }}" hidden>
 				<input type="text" style="font-size: 20px;" name="message" placeholder="Message..."><button style="font-size: 20px; background-color: #339EFF;">Send Message</button>
 			</form>
 			<div id="messages">
@@ -54,7 +55,7 @@
 				<p>No messages yet.</p>
 				{% endif %}
 				{% for message in messages %}
-				<div class="message"><p><b>{{ message[0] }}: </b> {{ message[1] }}</p></div>
+				<div class="message"><p><b><a href="/user/{{ message[0] }}">{{ message[0] }}</a>: </b> {{ message[1] }}</p></div>
 					{% if message[2] %}
 						<img src="{{ message[2] }}" onerror="console.log('Failed loading image')" height="100" width="100">
 					{% endif %}

@@ -15,6 +15,7 @@
 		<div style="margin-left:25%;padding:1px 16px;height:1000px;">
 			<h1 style="font-size: 40px;">Sign up</h1>
 			<form action="/signup" method="POST">
+				<input type="input" name="csrf_token" value="{{ csrf_token() }}" hidden>
 				<input type="input" name="username" placeholder="Enter username here..." style="font-size: 20px;" required><br>
 				<input type="password" name="password" placeholder="Enter password here..." style="font-size: 20px;" required><br><br>
 				<img src="/api/get_captcha"><br>

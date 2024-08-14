@@ -31,6 +31,7 @@
 			<p>Here you can create a community. Communities are places where people talk in Tweetify</p>
 			<hr>
 			<form action="/communities/create" method="POST">
+				<input type="input" name="csrf_token" value="{{ csrf_token() }}" hidden>
 				<label for="comname">Community name:</label>
 				<input type="text" name="comname" placeholder="Community Name..." required><br><br>
 				<label for="desc">Description of community (Max. 150 characters)</label><br><textarea name="desc" required>Remove and replace with your text...</textarea>

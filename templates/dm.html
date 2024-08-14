@@ -37,6 +37,7 @@
 				{% endfor %}
 			{% endif %}
 			<form action="/submitdm/{{ username }}" method="POST">
+				<input type="input" name="csrf_token" value="{{ csrf_token() }}" hidden>
 				<input type="text" name="message" style="font-size: 20px;" placeholder="Enter your message..."><br>
 				<button style="font-size: 20px; background-color: #339EFF;">Submit Direct Message</button>
 			</form>
