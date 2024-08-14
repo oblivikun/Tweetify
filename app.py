@@ -50,6 +50,11 @@ def hash_password(password):
     sha256_hash.update(password.encode('utf-8'))
     return sha256_hash.hexdigest()
 
+@app.after_request
+def antiiframe(response):
+    response.headers['X-Frame-Options'] = 'DENY'
+    return response
+
 @app.route("/api/get_captcha")
 @limiter.limit("25/minute")
 def generate_captcha():
