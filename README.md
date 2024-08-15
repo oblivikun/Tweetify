@@ -14,6 +14,7 @@ Void: xbps-install python3 python3-pip (i think)
 Gentoo: emerge python3 python3-pip (i think this is how you install on gentoo, but if you don't have python then your package manager won't work anyway lmao)
 OpenBSD: pkg_add python3 python3-pip
 FreeBSD: You can use pkg package manager
+Fedora: dnf install python3 python3-pip
 ```
 
 Then clone this repo with `git clone https://github.com/tweetoruser/Tweetify.git``
