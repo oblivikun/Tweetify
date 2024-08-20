@@ -26,6 +26,8 @@ limiter = Limiter(get_remote_address, app=app)
 
 
 def check_image_url(url):
+    allowed_extensions_regex = re.compile(r'\.(jpg|png|gif|jpeg|jfif|tiff|bmp)$')
+
     if not url.startswith(("https://", "http://")):
         return False
     
