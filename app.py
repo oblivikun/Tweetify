@@ -24,26 +24,34 @@ used_captchas = []
 
 limiter = Limiter(get_remote_address, app=app)
 
+
 def check_image_url(url):
-    allowed_extensions = ["jpg", "png", "gif", "jpeg", "jfif", "tiff", "bmp", "tiffy", "pif", "wpeg", "webp"]
-    if not url.startswith("https://") and not url.startswith("http://"):
+    if not url.startswith(("https://", "http://")):
         return False
+    
     parsed_url = urlparse(url)
     path = parsed_url.path
-    for ext in allowed_extensions:
-        if path.endswith(f".{ext}"):
-            break
-    else:
+    
+    if not allowed_extensions_regex.search(path):
         return False
+    
+    # Define a common User-Agent string to mimic a real browser
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+    }
+    
     try:
-        response = requests.head(url)
+        response = requests.head(url, allow_redirects=True, headers=headers)
         response.raise_for_status()
+        
         content_type = response.headers.get("Content-Type")
         if content_type and content_type.startswith("image/"):
             return True
-        return False
+        else:
+            return False
     except requests.exceptions.RequestException:
         return False
+
 
 def hash_password(password):
     sha256_hash = hashlib.sha256()
